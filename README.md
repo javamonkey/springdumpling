@@ -4,9 +4,9 @@
 	@Publish
 		path		:	一个逻辑路径,必须要
 		ruleExp		:	根据输入值,输出值的表达式判断是否需要Publish,否则,总是通知其他机器.
-						如规则rule="return Value==true",默认是发送
+						如规则```java rule="return Value==true"```,默认是发送
 		argExp		:	一个参数表达式列表,如果没有,则按照输入参数和输出参数作为参数列表,传递个sub.
-						参数格式如argExp="args[0].orderId,args[1],returnValue;"
+						参数格式如```java argExp="args[0].orderId,args[1],returnValue;"```
 	@Subscribe
 		path		:	一个逻辑路径,必须要
 		runPolicy	:	运行时机,有俩个值,一个是sameTransacion,表示于publish方法在同一事物里,
@@ -19,9 +19,9 @@
 	@RemotePublish (同Publish,但是发布到远程)
 		path		:	一个路径
 		ruleEx		:	根据输入值,输出值判断是否需要Notify,默认是returnValue!=null,否则,总是通知其他机器.
-						如规则rule="returnValue==true"
+						如规则```java rule="return Value==true"```
 		argExp		:	一个参数表达式列表,如果没有,则按照输入参数和输出参数作为参数列表,传递个sub.
-						参数格式如：argExp="arg0=input[0].orderId;arg1=input[0].cash;arg2=returnValue;"
+						参数格式如:```java argExp="arg0=input[0].orderId;arg1=input[0].cash;arg2=return Value;"```
 	@RemoteSubscriber
 		path		:	一个路径.
 	@RemoteSynronized
@@ -30,7 +30,7 @@
 		rule		:	根据输入值,输出值的表达式判断是否需要Notify,否则,总是通知其他机器.
 						如规则rule="return Value==true",默认是发送
 		argExp		:	一个参数表达式列表,如果没有,则按照输入参数和输出参数作为参数列表,传递个sub.
-						参数格式如:argExp="arg0=input[0].orderId;arg1=input[0].cash;arg2=returnValue;"
+						参数格式如:```java argExp="arg0=input[0].orderId;arg1=input[0].cash;arg2=return Value;"``` 
 	@RemoteWait
 		path		:	一个路径
 	
