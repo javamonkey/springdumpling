@@ -1,7 +1,6 @@
 1:协作服务
 =====
-	@CooperationService
-		类似于Spring的@Service所有标记@CooperationService的类都将检查类方法里是否有如下annotation
+	@CooperationService (类似于Spring的@Service所有标记@CooperationService的类都将检查类方法里是否有如下annotation)
 	@Publish
 		path		:	一个逻辑路径,必须要
 		ruleExp		:	根据输入值,输出值的表达式判断是否需要Publish,否则,总是通知其他机器.
@@ -17,8 +16,7 @@
 		path		:	一个逻辑路径,一旦机器(JVM)获取锁,将永久占有锁,机器宕机或者失去连接,
 						将导致其他机器中的某一个占用allowAcessAsFistTime:false或者true,默认false.
 						如果为true,则允许第一次调用忽略锁
-	@RemotePublish
-		同Publish,但是发布到远程
+	@RemotePublish (同Publish,但是发布到远程)
 		path		:	一个路径
 		ruleEx		:	根据输入值,输出值判断是否需要Notify,默认是returnValue!=null,否则,总是通知其他机器.
 						如规则rule="returnValue==true"
@@ -27,7 +25,7 @@
 	@RemoteSubscriber
 		path		:	一个路径.
 	@RemoteSynronized
-	@RemoteNotify // 远程只能有一个被执行
+	@RemoteNotify (远程只能有一个被执行)
 		path		:	一个路径
 		rule		:	根据输入值,输出值的表达式判断是否需要Notify,否则,总是通知其他机器.
 						如规则rule="return Value==true",默认是发送
@@ -65,7 +63,9 @@ service.send(path2, arglist2);
 5:应用场景说明
 =====
 	1.多台机器上只有一台能执行某个Job,则使用@RemoteSynronized
-	2.主业务调用后会调用一些次要业务,不希望次要业务影响主业务的性能和牺牲可维护性主业务使用@Publish,多个次业务使用@Subscribe.
+	2.主业务调用后会调用一些次要业务,不希望次要业务影响主业务的性能和牺牲可维护性主业务使用@Publish,
+	  多个次业务使用@Subscribe.
 	3.数据需要同步到多台机器上,使用@RemotePublish和@RemoteSubscriber标签
 	4.数据需要交给远程的任一台机器处理,使用@RemoteNotify然后结合@RemoteWait标签一起用
-	5.主业务和次要业务处理后,还要求交给远端一个机器处理可以在使用@Publish,@Subscrbie后,可以结合@RemoteNotify,@RemoteWait来处理
+	5.主业务和次要业务处理后,还要求交给远端一个机器处理可以在使用@Publish,@Subscrbie后,
+	  可以结合@RemoteNotify,@RemoteWait来处理
