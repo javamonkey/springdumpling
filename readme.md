@@ -74,8 +74,8 @@ service.send(path2, arglist2);
 
 5:应用场景说明
 =====
-	1.多台机器上只有一台能执行某个job,则使用@RemoteSynronized
+	1.多台机器上只有一台能执行某个Job,则使用@RemoteSynronized
 	2.主业务调用后会调用一些次要业务,不希望次要业务影响主业务的性能和牺牲可维护性主业务使用@Publish,多个次业务使用@Subscribe.
-	3.数据需要同步到多台机器上,使用@RemotePublish和 @RemoteSubscriber标签
+	3.数据需要同步到多台机器上,使用@RemotePublish和@RemoteSubscriber标签
 	4.数据需要交给远程的任一台机器处理,使用@RemoteNotify然后结合@RemoteWait标签一起用
-	5.主业务和次要业务处理后,还要求交给远端一个机器处理 可以在使用@Publish,@Subscrbie后,可以结合@RemoteNotify,@RemoteWait来处理
+	5.主业务和次要业务处理后,还要求交给远端一个机器处理可以在使用@Publish,@Subscrbie后,可以结合@RemoteNotify,@RemoteWait来处理
