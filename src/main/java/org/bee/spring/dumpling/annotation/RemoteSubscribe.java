@@ -11,9 +11,10 @@ import org.springframework.stereotype.Component;
 @Retention(RetentionPolicy.RUNTIME)
 @Component
 public @interface RemoteSubscribe {
-	// 订阅的path
+	/**
+	 * 订阅的path
+	 */
 	public String path();
 
 	public boolean inSameTransactionContext() default false;
-
 }

@@ -2,18 +2,14 @@ package org.bee.spring.dumpling.clustersync.zk;
 
 import org.apache.zookeeper.ZooKeeper;
 
-public class ZKCliFactory
-{
+public class ZKCliFactory {
 	private static ZKCli zkCli;
 
-	public void setZkCli(ZKCli zk)
-	{
+	public void setZkCli(ZKCli zk) {
 		zkCli = zk;
 	}
 
-	public static ZooKeeper getZK()
-	{
+	public static ZooKeeper getZK() {
 		return zkCli.getZk();
 	}
-
 }

@@ -7,16 +7,8 @@ import java.lang.annotation.Target;
 
 import org.springframework.stereotype.Component;
 
-/**
- * 
- * @author jzli
- * 
- */
-@Target(
-{ ElementType.TYPE })
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface CooperationService
-{
-
+public @interface CooperationService {
 }

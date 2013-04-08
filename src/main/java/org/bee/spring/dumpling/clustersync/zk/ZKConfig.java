@@ -6,85 +6,73 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.data.ACL;
 
 /**
- * zk 配置
+ * 配置
+ * 
  * @author KevinLiao
- *
  */
-public class ZKConf
-{
+public class ZKConfig {
 	/**
-	 * server 地址
+	 * Server 地址
 	 */
 	private String server;
 	/**
-	 * 连接zkserver超时时间
+	 * 连接Server超时时间
 	 */
 	private final int timeout = 10000;
 	/**
-	 * 进行节点acl限制的scheme
+	 * 进行节点ACL限制的Scheme
 	 */
 	private final String scheme = "digest";
 	/**
-	 * 进行节点acl限制的auth串
+	 * 进行节点ACL限制的Auth串
 	 */
 	protected String auth = "admin:admin";
 	/**
-	 * 是否使用acl，默认为0，表示不使用<br>
-	 * 不使用则scheme和auth无意义
+	 * 是否使用ACL，默认为0，表示不使用不使用则Scheme和Auth无意义
 	 */
 	private int useACL;
 	/**
-	 * acl列表
+	 * ACL列表
 	 */
 	protected List<ACL> acls = Ids.OPEN_ACL_UNSAFE;
 
-	public String getServer()
-	{
+	public String getServer() {
 		return server;
 	}
 
-	public void setServer(String server)
-	{
+	public void setServer(String server) {
 		this.server = server;
 	}
 
-	public String getAuth()
-	{
+	public String getAuth() {
 		return auth;
 	}
 
-	public void setAuth(String auth)
-	{
+	public void setAuth(String auth) {
 		this.auth = auth;
 	}
 
-	public int getUseACL()
-	{
+	public int getUseACL() {
 		return useACL;
 	}
 
-	public void setUseACL(int useACL)
-	{
+	public void setUseACL(int useACL) {
 		this.useACL = useACL;
 	}
 
-	public List<ACL> getAcls()
-	{
+	public List<ACL> getAcls() {
 		return acls;
 	}
 
-	public void setAcls(List<ACL> acls)
-	{
+	public void setAcls(List<ACL> acls) {
 		this.acls = acls;
 	}
 
-	public int getTimeout()
-	{
+	public int getTimeout() {
 		return timeout;
 	}
 
-	public String getScheme()
-	{
+	public String getScheme() {
 		return scheme;
 	}
 

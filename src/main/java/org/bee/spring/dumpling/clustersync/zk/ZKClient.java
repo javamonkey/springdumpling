@@ -1,17 +1,15 @@
 package org.bee.spring.dumpling.clustersync.zk;
 
-public interface ZKClient
-{
-
-	void doSth();
+public interface ZKClient {
+	void destroy();
 
 	void doFollowerThings();
 
-	boolean isMaster();
-
-	boolean isAlive();
+	void doSth();
 
 	void init() throws Exception;
 
-	void destroy();
+	boolean isAlive();
+
+	boolean isMaster();
 }

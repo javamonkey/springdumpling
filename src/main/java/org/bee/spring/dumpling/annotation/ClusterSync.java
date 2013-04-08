@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ClusterSync
-{
+public @interface ClusterSync {
 	public String path();
 
-	/*设置为true，第一次调用无视Cluster Lock*/
+	/**
+	 * 设置为true,第一次调用无视Cluster Lock
+	 */
 	public boolean allowAcessAsFistTime() default false;
 }

@@ -3,23 +3,21 @@ package org.bee.spring.dumpling.jms.activemq;
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class QueueSender
-{
-	Logger logger = Logger.getLogger(QueueSender.class);
+public class QueueSender {
+	private Logger logger = LoggerFactory.getLogger(QueueSender.class);
 
-	public void sendObject(String url, String path, String user, String password, boolean persistent,
-			java.io.Serializable o)
-	{
+	public void sendObject(String url, String path, String user, String password, boolean persistent, java.io.Serializable o) {
 		Connection connection = null;
-		try
-		{
+		try {
 			// Create the connection.
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(user, password, url);
 			connection = connectionFactory.createConnection();
@@ -28,36 +26,21 @@ public class QueueSender
 			// Create the session
 			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination destination = session.createQueue(path);
-
 			MessageProducer producer = session.createProducer(destination);
-			if (persistent)
-			{
+			if (persistent) {
 				producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-			}
-			else
-			{
+			} else {
 				producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			}
-
 			ObjectMessage objectMessage = session.createObjectMessage();
 			objectMessage.setObject(o);
 			producer.send(objectMessage);
-
-		}
-		catch (Exception e)
-		{
-
+		} catch (Exception e) {
 			logger.warn("@RemoteNotify Error for " + o.toString(), e);
-		}
-		finally
-		{
-			try
-			{
-
+		} finally {
+			try {
 				connection.close();
-			}
-			catch (Throwable ignore)
-			{
+			} catch (JMSException ignore) {
 			}
 		}
 	}

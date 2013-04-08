@@ -19,10 +19,6 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 
-/**
- * 
- * @author KevinLiao 2012-2-14
- */
 public abstract class AbstractZKClient implements Watcher
 {
 	protected Log logger = LogFactory.getLog(getClass());
@@ -31,14 +27,12 @@ public abstract class AbstractZKClient implements Watcher
 	 */
 	protected ZooKeeper zk;
 
-	protected ZKConf conf;
+	protected ZKConfig conf;
 
 	private CountDownLatch connectedSignal;
 
 	/**
-	 * 返回zk是否在正常连接，如果没有请应用自己判断如何处理
-	 * 
-	 * @return
+	 * 返回ZK是否在正常连接，如果没有请应用自己判断如何处理
 	 */
 	public boolean isAlive()
 	{
@@ -122,12 +116,12 @@ public abstract class AbstractZKClient implements Watcher
 		return zk;
 	}
 
-	public ZKConf getConf()
+	public ZKConfig getConf()
 	{
 		return conf;
 	}
 
-	public void setConf(ZKConf conf)
+	public void setConfig(ZKConfig conf)
 	{
 		this.conf = conf;
 	}

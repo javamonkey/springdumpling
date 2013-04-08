@@ -7,25 +7,15 @@ import java.lang.annotation.Target;
 
 import org.springframework.stereotype.Component;
 
-/**
- * 
- * @author jzli
- * 
- */
-@Target(
-{ ElementType.METHOD })
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface Publish
-{
-
+public @interface Publish {
 	public static final String SAME = "...";
-	
 
 	public String path();
 
 	public String argExp() default SAME;
 
 	public String ruleExp() default "";
-
 }

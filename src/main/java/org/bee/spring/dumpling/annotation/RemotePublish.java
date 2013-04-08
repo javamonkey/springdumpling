@@ -9,16 +9,13 @@ import org.springframework.stereotype.Component;
 
 /**
  * 发布到所有远程机器上
- * @author jzli
  * 
+ * @author jzli
  */
-@Target(
-{ ElementType.METHOD })
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface RemotePublish
-{
-
+public @interface RemotePublish {
 	public static final String SAME = "...";
 
 	public String path();
@@ -28,10 +25,6 @@ public @interface RemotePublish
 	public String ruleExp() default "";
 
 	public boolean persisit() default false;
-	
-	/*  目前暂时不支持  */
-	public static final String PUBLISH_AFTER_RUN = "run";	
-	public static final String PUBLISH_AFTER_COMMIT = "commit";
-	
-	public String pubishAfter() default PUBLISH_AFTER_RUN ;
+
+	public PubishAfter pubishAfter() default PubishAfter.Run;
 }

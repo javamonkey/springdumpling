@@ -6,22 +6,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 控制事物策略
+ * 
  * @author jzli
- *
  */
 @Service("dumpling-runnerWrapperService")
-public class RunnerWrapperService
-{
-
+public class RunnerWrapperService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void runWithNewTransaction(Runnable runner)
-	{
+	public void runWithNewTransaction(Runnable runner) {
 		runner.run();
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void runWithRequiredTransaction(Runnable runner)
-	{
+	public void runWithRequiredTransaction(Runnable runner) {
 		runner.run();
 	}
 }

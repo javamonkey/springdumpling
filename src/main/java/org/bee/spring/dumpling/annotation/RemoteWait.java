@@ -7,8 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RemoteWait
-{
+public @interface RemoteWait {
 	public String path();
-
 }

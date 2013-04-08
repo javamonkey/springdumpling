@@ -11,13 +11,10 @@ import org.springframework.stereotype.Component;
 @Retention(RetentionPolicy.RUNTIME)
 @Component
 public @interface Subscribe {
-	// 订阅的path
-	public String SAME_TRANSATION = "sameTransation";
-	public String AFTER_COMMIT = "afterCommit";
-	
-	
+	/**
+	 * 订阅的path
+	 */
 	public String path();
-	
-	public String runPolicy() default AFTER_COMMIT;
 
+	public RunPolicy runPolicy() default RunPolicy.AfterCommit;
 }

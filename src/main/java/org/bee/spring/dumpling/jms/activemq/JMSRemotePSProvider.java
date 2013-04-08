@@ -17,7 +17,7 @@ import org.bee.tl.core.SimpleRuleEval;
 public class JMSRemotePSProvider implements RemotePSProvider
 {
 
-	JmsConfig jmsConf = null;
+	JMSConfig jmsConf = null;
 	SpringBowl bowl = null;
 	final Map<String, TopicListener> listenerMap = new HashMap<String, TopicListener>();
 
@@ -85,7 +85,7 @@ public class JMSRemotePSProvider implements RemotePSProvider
 			public void run()
 			{
 				TopicSender topicSender = new TopicSender();
-				topicSender.sendObject(jmsConf.getUrl(), path, jmsConf.getUserName(), jmsConf.getPassword(), pesisit,
+				topicSender.sendObject(jmsConf.getURL(), path, jmsConf.getUsername(), jmsConf.getPassword(), pesisit,
 						realArgs);
 			}
 		});
@@ -109,7 +109,7 @@ public class JMSRemotePSProvider implements RemotePSProvider
 					ls.setSpringBowl(bowl);
 					try
 					{
-						ls.init(jmsConf.getUrl(), jmsConf.getUserName(), jmsConf.getPassword());
+						ls.init(jmsConf.getURL(), jmsConf.getUsername(), jmsConf.getPassword());
 						listenerMap.put(path, ls);
 					}
 					catch (Exception e)
@@ -130,12 +130,12 @@ public class JMSRemotePSProvider implements RemotePSProvider
 		}
 	}
 
-	public JmsConfig getJmsConf()
+	public JMSConfig getJmsConf()
 	{
 		return jmsConf;
 	}
 
-	public void setJmsConf(JmsConfig jmsConf)
+	public void setJmsConf(JMSConfig jmsConf)
 	{
 		this.jmsConf = jmsConf;
 	}
@@ -147,7 +147,7 @@ public class JMSRemotePSProvider implements RemotePSProvider
 			public void run()
 			{
 				TopicSender topicSender = new TopicSender();
-				topicSender.sendObject(jmsConf.getUrl(), path, jmsConf.getUserName(), jmsConf.getPassword(), persist,
+				topicSender.sendObject(jmsConf.getURL(), path, jmsConf.getUsername(), jmsConf.getPassword(), persist,
 						args);
 			}
 		});
