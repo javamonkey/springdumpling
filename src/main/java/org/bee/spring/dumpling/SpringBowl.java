@@ -68,10 +68,10 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 
 	private ApplicationContext context;
 
-	public static final String ALL_PUB_ANNOATION = "@annotation(com.bee.spring.dumpling.annotation.Publish)&&@annotation(pub)";//"execution(* com.mytest.HelloServiceImpl.*(..))" ;
-	public static final String ALL_CLUSTERSYNC_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.ClusterSync) && @annotation(clusterSync)";
-	public static final String ALL_REMOTE_NOTIFY_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.RemoteNotify) && @annotation(notify)";
-	public static final String ALL_REMOTE_PUBLISH_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.RemotePublish) && @annotation(pub)";
+	public static final String ALL_PUB_ANNOATION = "@annotation(org.bee.spring.dumpling.annotation.Publish)&&@annotation(pub)";//"execution(* com.mytest.HelloServiceImpl.*(..))" ;
+	public static final String ALL_CLUSTERSYNC_ANNOTATION = "@annotation(org.bee.spring.dumpling.annotation.ClusterSync) && @annotation(clusterSync)";
+	public static final String ALL_REMOTE_NOTIFY_ANNOTATION = "@annotation(org.bee.spring.dumpling.annotation.RemoteNotify) && @annotation(notify)";
+	public static final String ALL_REMOTE_PUBLISH_ANNOTATION = "@annotation(org.bee.spring.dumpling.annotation.RemotePublish) && @annotation(pub)";
 
 	PSProvider psProvider = null;
 	ClusterSyncProvider clusterSyncProvider = null;
@@ -122,13 +122,13 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 					sync.addCallPara(joinPoint, retVal);
 					
 				}else{
-					//不可能发生，不过保险起见
-					throw new RuntimeException("没有事物，不能使用Publish.PUBLISH_AFTER_COMMIT");
+					//有可能发生，
+					//throw new RuntimeException("没有事物，不能使用Publish.PUBLISH_AFTER_COMMIT");
 				}
 			}
 			
 			//立即执行
-			psProvider.run(joinPoint, retVal, pub, this,Subscribe.SAME_TRANSATION);
+			psProvider.run(joinPoint, retVal, pub, this);
 			
 			
 			
@@ -397,6 +397,9 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	@Override
 	public void onApplicationEvent(ApplicationEvent event)
 	{
+		
+		
+	
 		//或者考虑一个ArryQueue+Thread+ CallerRunsPolicy,
 		if (event instanceof ContextRefreshedEvent)
 		{
@@ -434,6 +437,7 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 				clusterSyncProvider.process(context, cs);
 				logger.info("ClusterSync:  ,path=" + cs.path());
 			}
+			//todo:手动注册其他bean
 
 			checkSubPub();
 		}

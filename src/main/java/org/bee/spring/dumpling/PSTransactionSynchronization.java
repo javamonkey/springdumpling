@@ -88,7 +88,7 @@ public class PSTransactionSynchronization implements TransactionSynchronization
 	
 	private void doPub(){
 		for(CallPara para:list){
-			bowl.getPsProvider().run(para.joinPoint, para.retVal, pub, bowl,Subscribe.AFTER_COMMIT);
+			bowl.getPsProvider().run(para.joinPoint, para.retVal, pub, bowl);
 		}
 	}
 

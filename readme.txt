@@ -3,7 +3,7 @@
 所有标记@CooperationService的类都将检查类方法里是否有如下annotation 
     @Publish / @Subscribe     
     @RemotePublish / @RemoteSubscriber 
-    @RemoteSynronized 	
+    @ClusterSync 	
     @RemoteNotify / @RemoteWait
     @Process / @Task
 

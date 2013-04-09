@@ -22,7 +22,7 @@ public class DefaultPSProviderImpl implements PSProvider
 	Logger logger = Logger.getLogger(PSProvider.class);
 
 	@Override
-	public void run(JoinPoint joinPoint, Object returnValue, Publish pub, SpringBowl bowl,String runPolicy)
+	public void run(JoinPoint joinPoint, Object returnValue, Publish pub, SpringBowl bowl)
 	{
 		Map<String, List<TargetCall>> map = bowl.getPsCallMap();
 		ApplicationContext context = bowl.getContext();
@@ -91,9 +91,7 @@ public class DefaultPSProviderImpl implements PSProvider
 		final Object[] args = realArgs;
 		for (TargetCall call : listCall)
 		{
-			if(!call.getRunPolicy().equals(runPolicy)){
-				continue ;
-			}
+			
 			final Method m = call.getM();
 			//允许调用
 			m.setAccessible(true);

@@ -6,5 +6,5 @@ import org.bee.spring.dumpling.annotation.Publish;
 
 public interface PSProvider
 {
-	public void run(JoinPoint joinPoint, Object returnValue, Publish pub, SpringBowl bowl,String runPolicy);
+	public void run(JoinPoint joinPoint, Object returnValue, Publish pub, SpringBowl bowl);
 }
