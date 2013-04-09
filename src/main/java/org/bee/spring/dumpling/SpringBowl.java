@@ -1,6 +1,5 @@
 package org.bee.spring.dumpling;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,7 +99,7 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 				sync.addCallPara(joinPoint, retVal);
 			} else {
 				// 不可能发生，不过保险起见
-				throw new RuntimeException("没事物，不能使用Publish.PUBLISH_AFTER_COMMIT");
+				throw new RuntimeException("没事物，不能使用PubishAfter.Commit");
 			}
 		}
 		// 立即执行
@@ -189,7 +188,7 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	public void onApplicationEvent(ApplicationEvent event) {
 		// 或者考虑一个ArryQueue+Thread+ CallerRunsPolicy,
 		if (event instanceof ContextRefreshedEvent) {
-			pool = new ThreadPoolExecutor(poolSize, poolSize, 60, TimeUnit.SECONDS, new LinkedBlockingQueue());
+			pool = new ThreadPoolExecutor(poolSize, poolSize, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 			if (psProvider == null) {
 				// 使用默认协调者
 				psProvider = new DefaultPSProviderImpl();
@@ -272,10 +271,6 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 				if (m.isAnnotationPresent(Subscribe.class)) {
 					Subscribe subcribe = m.getAnnotation(Subscribe.class);
 					String path = subcribe.path();
-					TargetCall tc = new TargetCall();
-					tc.setMethod(m);
-					tc.setBeanName(beanName);
-					tc.setRunPolicy(subcribe.runPolicy());
 					if (PubishAfter.Commit.equals(subcribe.runPolicy()) && !subscribeRunAfterCommitList.contains(path)) {
 						this.subscribeRunAfterCommitList.add(path);
 					}
@@ -285,7 +280,7 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 						listCall = new ArrayList<TargetCall>();
 						subScribeCallMap.put(path, listCall);
 					}
-					listCall.add(tc);
+					listCall.add(new TargetCall(m, null, beanName, subcribe.runPolicy()));
 				} else {
 					if (m.isAnnotationPresent(Publish.class)) {
 						pubList.add(m.getAnnotation(Publish.class).path());
@@ -294,8 +289,7 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 
 				// 继续检查其他annotation，如 @RemoteSynchronized ,@RemoteNotify等
 				if (m.isAnnotationPresent(ClusterSync.class)) {
-					ClusterSync clusterSync = m.getAnnotation(ClusterSync.class);
-					clusterSyncList.add(clusterSync);
+					clusterSyncList.add(m.getAnnotation(ClusterSync.class));
 				}
 
 				if (m.isAnnotationPresent(RemoteNotify.class)) {
@@ -304,14 +298,9 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 						notifyList.add(path);
 					}
 				}
-
-				RemoteWait rw = m.getAnnotation(RemoteWait.class);
-				if (rw != null) {
-					String path = rw.path();
-
-					TargetCall tc = new TargetCall();
-					tc.setMethod(m);
-					tc.setBeanName(beanName);
+				
+				if (m.isAnnotationPresent(RemoteWait.class)) {
+					String path = m.getAnnotation(RemoteWait.class).path();
 
 					List<TargetCall> listCall = waitCallMap.get(path);
 					if (listCall == null) {
@@ -321,9 +310,9 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 					// 检查是否重复,否则,这会导致消息被处理俩次
 					if (listCall.size() != 0) {
 						boolean isDuplicate = false;
-						for (TargetCall call : listCall) {
-							if (call.getBeanName().equals(beanName)) {
-								Method other = call.getMethod();
+						for (TargetCall target : listCall) {
+							if (target.getBeanName().equals(beanName)) {
+								Method other = target.getMethod();
 								if (other.equals(m)) {
 									isDuplicate = true;
 									break;
@@ -331,36 +320,30 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 							}
 						}
 						if (!isDuplicate) {
-							listCall.add(tc);
+							listCall.add(new TargetCall(m, null, beanName, null));
 						}
 					} else {
-						listCall.add(tc);
+						listCall.add(new TargetCall(m, null, beanName, null));
 					}
 				}
 
-				RemotePublish rp = m.getAnnotation(RemotePublish.class);
-				if (rp != null) {
-					String path = rp.path();
+				if (m.isAnnotationPresent(RemotePublish.class)) {
+					String path = m.getAnnotation(RemotePublish.class).path();
 					if (!remotePubList.contains(path)) {
 						remotePubList.add(path);
 					}
 				}
 
-				RemoteSubscribe rs = m.getAnnotation(RemoteSubscribe.class);
-				if (rs != null) {
-					String path = rs.path();
-
-					TargetCall tc = new TargetCall();
-					tc.setMethod(m);
-					tc.setBeanName(beanName);
+				if (m.isAnnotationPresent(RemoteSubscribe.class)) {
+					String path = m.getAnnotation(RemoteSubscribe.class).path();
 
 					List<TargetCall> listCall = remoteSubscribeMap.get(path);
 					if (listCall == null) {
 						listCall = new ArrayList<TargetCall>();
 						remoteSubscribeMap.put(path, listCall);
 					}
+					
 					// 检查是否重复,否则,这会导致消息被处理俩次
-
 					if (listCall.size() != 0) {
 						boolean isDuplicate = false;
 						for (TargetCall call : listCall) {
@@ -373,10 +356,10 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 							}
 						}
 						if (!isDuplicate) {
-							listCall.add(tc);
+							listCall.add(new TargetCall(m, null, beanName, null));
 						}
 					} else {
-						listCall.add(tc);
+						listCall.add(new TargetCall(m, null, beanName, null));
 					}
 				}
 			}
@@ -386,10 +369,8 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.context = applicationContext;
-
+	public void setApplicationContext(ApplicationContext context) throws BeansException {
+		this.context = context;
 	}
 
 	public void setClusterSyncProvider(ClusterSyncProvider clusterSyncProvider) {

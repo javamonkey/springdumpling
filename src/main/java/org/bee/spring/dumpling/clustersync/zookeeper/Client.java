@@ -1,6 +1,6 @@
-package org.bee.spring.dumpling.clustersync.zk;
+package org.bee.spring.dumpling.clustersync.zookeeper;
 
-public interface ZKClient {
+public interface Client {
 	void destroy();
 
 	void doFollowerThings();

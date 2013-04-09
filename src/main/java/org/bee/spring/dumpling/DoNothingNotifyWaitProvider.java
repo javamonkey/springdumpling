@@ -1,24 +1,26 @@
 package org.bee.spring.dumpling;
 
-import java.util.List;
-import java.util.Map;
-
 import org.aspectj.lang.JoinPoint;
 import org.bee.spring.dumpling.annotation.RemoteNotify;
 
 public class DoNothingNotifyWaitProvider implements NotifyWaitProvider {
 	@Override
 	public void notify(JoinPoint joinPoint, Object returnValue, RemoteNotify notify) {
-		System.out.println("DoNothingNotifyWaitProvider: notify path="
-				+ notify.path() + " ,target=" + joinPoint.getTarget()
-				+ " method:" + joinPoint.getSignature().getName());
+		System.out.print("DoNothingNotifyWaitProvider: notify path=");
+		System.out.print(notify.path());
+		System.out.print(" ,target=");
+		System.out.print(joinPoint.getTarget());
+		System.out.print(" method:");
+		System.out.print(joinPoint.getSignature().getName());
+		System.out.println();
 	}
 
 	@Override
 	public void init(SpringBowl bowl) {
 		System.out.println("DoNothingNotifyWaitProvider: init");
-		Map<String, List<TargetCall>> map = bowl.getWaitCallMap();
-		System.out.println("DoNothingNotifyWaitProvider listen:" + map.keySet());
+		System.out.print("DoNothingNotifyWaitProvider listen:");
+		System.out.print(bowl.getWaitCallMap().keySet());
+		System.out.println();
 	}
 
 	@Override

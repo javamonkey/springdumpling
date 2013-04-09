@@ -5,54 +5,23 @@ import java.lang.reflect.Method;
 import org.bee.spring.dumpling.annotation.RunPolicy;
 
 public class TargetCall {
+	private String beanName;
 	private Method method;
 	private String path;
-	private String beanName;
 	private RunPolicy runPolicy = RunPolicy.AfterCommit;
 
-	public Method getMethod() {
-		return method;
+	public TargetCall() {
 	}
 
-	public void setMethod(Method method) {
+	public TargetCall(Method method, String path, String beanName,
+			RunPolicy runPolicy) {
+		super();
 		this.method = method;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
 		this.path = path;
-	}
-
-	public String getBeanName() {
-		return beanName;
-	}
-
-	public void setBeanName(String beanName) {
 		this.beanName = beanName;
-	}
-
-	public RunPolicy getRunPolicy() {
-		return runPolicy;
-	}
-
-	public void setRunPolicy(RunPolicy runPolicy) {
 		this.runPolicy = runPolicy;
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((beanName == null) ? 0 : beanName.hashCode());
-		result = prime * result + ((method == null) ? 0 : method.hashCode());
-		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		result = prime * result + ((runPolicy == null) ? 0 : runPolicy.hashCode());
-		return result;
-	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -80,5 +49,48 @@ public class TargetCall {
 		if (runPolicy != other.runPolicy)
 			return false;
 		return true;
+	}
+
+	public String getBeanName() {
+		return beanName;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public RunPolicy getRunPolicy() {
+		return runPolicy;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((beanName == null) ? 0 : beanName.hashCode());
+		result = prime * result + ((method == null) ? 0 : method.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		result = prime * result + ((runPolicy == null) ? 0 : runPolicy.hashCode());
+		return result;
+	}
+
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public void setRunPolicy(RunPolicy runPolicy) {
+		this.runPolicy = runPolicy;
 	}
 }

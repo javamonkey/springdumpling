@@ -3,7 +3,7 @@ package org.bee.spring.dumpling;
 import org.aspectj.lang.JoinPoint;
 import org.bee.spring.dumpling.annotation.RemoteNotify;
 
-public interface NotifyWaitProvider {
+public interface NotifyWaitProvider extends AutoCloseable {
 	public void notify(JoinPoint joinPoint, Object returnValue, RemoteNotify notify);
 
 	/** 逻辑中，直接发送 */
