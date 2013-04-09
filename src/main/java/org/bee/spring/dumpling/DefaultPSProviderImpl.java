@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.UnexpectedRollbackException;
 
 public class DefaultPSProviderImpl implements PSProvider {
-	Logger logger = LoggerFactory.getLogger(PSProvider.class);
+	protected Logger logger = LoggerFactory.getLogger(PSProvider.class);
 
 	private void runMethod(final Method proxyMethod, final Object proxy, final Object[] args, boolean isThrowError) {
 		try {
@@ -56,7 +56,6 @@ public class DefaultPSProviderImpl implements PSProvider {
 			} catch (SimpleEvalException e) {
 				throw new RuntimeException(e);
 			}
-
 		}
 		Object[] realArgs = null;
 		String argExp = pub.argExp();
@@ -73,7 +72,6 @@ public class DefaultPSProviderImpl implements PSProvider {
 			} catch (SimpleEvalException e) {
 				throw new RuntimeException(e);
 			}
-
 		} else {
 			realArgs = joinPoint.getArgs();
 		}

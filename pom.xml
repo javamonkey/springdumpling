@@ -5,6 +5,13 @@
 	<artifactId>dumpling</artifactId>
 	<version>0.1</version>
 	<dependencies>
+		<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+
 		<!-- AOP -->
 		<dependency>
 			<groupId>org.aspectj</groupId>

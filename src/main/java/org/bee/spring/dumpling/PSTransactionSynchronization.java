@@ -9,31 +9,32 @@ import org.bee.spring.dumpling.annotation.Publish;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
- * 事物提交的时候在执行Pub动作
+ * 事物提交的时候在执行@Publish动作
  * 
  * @author jzli
  */
 public class PSTransactionSynchronization implements TransactionSynchronization {
 	private static class CallPara {
-		JoinPoint joinPoint;
-		Object retVal;
-		CallPara(JoinPoint joinPoint, Object retVal) {
-			this.joinPoint = joinPoint;
-			this.retVal = retVal;
+		private JoinPoint point;
+		private Object returnValue;
+
+		private CallPara(JoinPoint point, Object returnValue) {
+			this.point = point;
+			this.returnValue = returnValue;
 		}
 	}
 	private SpringBowl bowl;
 	private List<CallPara> list = new ArrayList<CallPara>(1);
 
-	private Publish pub;
+	private Publish publish;
 
-	public PSTransactionSynchronization(Publish pub, SpringBowl bowl) {
-		this.pub = pub;
+	public PSTransactionSynchronization(Publish publish, SpringBowl bowl) {
+		this.publish = publish;
 		this.bowl = bowl;
 	}
 
-	public void addCallPara(JoinPoint joinPoint, Object retVal) {
-		list.add(new CallPara(joinPoint, retVal));
+	public void addCallPara(JoinPoint point, Object returnValue) {
+		list.add(new CallPara(point, returnValue));
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class PSTransactionSynchronization implements TransactionSynchronization 
 
 	private void doPub() {
 		for (CallPara para : list) {
-			bowl.getPsProvider().run(para.joinPoint, para.retVal, pub, bowl, RunPolicy.AfterCommit);
+			bowl.getPsProvider().run(para.point, para.returnValue, publish, bowl, RunPolicy.AfterCommit);
 		}
 	}
 

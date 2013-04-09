@@ -10,11 +10,7 @@ public class TargetCall {
 	private String path;
 	private RunPolicy runPolicy = RunPolicy.AfterCommit;
 
-	public TargetCall() {
-	}
-
-	public TargetCall(Method method, String path, String beanName,
-			RunPolicy runPolicy) {
+	public TargetCall(Method method, String path, String beanName, RunPolicy runPolicy) {
 		super();
 		this.method = method;
 		this.path = path;

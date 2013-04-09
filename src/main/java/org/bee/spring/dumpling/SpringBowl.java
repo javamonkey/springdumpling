@@ -16,14 +16,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.bee.spring.dumpling.annotation.ClusterSync;
 import org.bee.spring.dumpling.annotation.CooperationService;
-import org.bee.spring.dumpling.annotation.PubishAfter;
 import org.bee.spring.dumpling.annotation.Publish;
 import org.bee.spring.dumpling.annotation.RemoteNotify;
 import org.bee.spring.dumpling.annotation.RemotePublish;
-import org.bee.spring.dumpling.annotation.RemoteSubscribe;
-import org.bee.spring.dumpling.annotation.RemoteWait;
 import org.bee.spring.dumpling.annotation.RunPolicy;
-import org.bee.spring.dumpling.annotation.Subscribe;
+import org.bee.spring.dumpling.util.PointCut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -45,16 +42,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Aspect
 public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
-	public static final String ALL_CLUSTERSYNC_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.ClusterSync) && @annotation(clusterSync)";
-	public static final String ALL_PUB_ANNOATION = "@annotation(com.bee.spring.dumpling.annotation.Publish)&&@annotation(pub)";// "execution(* com.mytest.HelloServiceImpl.*(..))"
-	public static final String ALL_REMOTE_NOTIFY_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.RemoteNotify) && @annotation(notify)";
-	public static final String ALL_REMOTE_PUBLISH_ANNOTATION = "@annotation(com.bee.spring.dumpling.annotation.RemotePublish) && @annotation(pub)";
 	public List<String> allService = new ArrayList<String>();
 	public List<ClusterSync> clusterSyncList = new ArrayList<ClusterSync>();
 	private ClusterSyncProvider clusterSyncProvider;
-
 	private ApplicationContext context;
-	private Logger logger = LoggerFactory.getLogger(SpringBowl.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/** RemoteNotify&RemoteWait */
 	public List<String> notifyList = new ArrayList<String>();
@@ -64,11 +56,11 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 
 	private int poolSize = 2;
 
-	private PSProvider psProvider;
-	public List<String> pubList = new ArrayList<String>();
-	private RemotePSProvider remotePSProvider;
+	private PSProvider localProvider;
+	public List<String> publishList = new ArrayList<String>();
+	private RemotePSProvider remoteProvider;
 	/** RemotePublish@RemoteSubscribe */
-	public List<String> remotePubList = new ArrayList<String>();
+	public List<String> remotePublishList = new ArrayList<String>();
 
 	public Map<String, List<TargetCall>> remoteSubscribeMap = new HashMap<String, List<TargetCall>>();
 	public Map<String, List<TargetCall>> subScribeCallMap = new HashMap<String, List<TargetCall>>();
@@ -77,9 +69,9 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	public Map<String, List<TargetCall>> waitCallMap = new HashMap<String, List<TargetCall>>();
 
 	/**
-	 * 任何使用了@Pub的方法将在成功返回后调用（同步或者异步）使用了同样path的@Subscribe的方法
+	 * 任何使用了@Pub的方法将在成功返回后调用(同步或者异步)使用了同样path的@Subscribe的方法
 	 */
-	@AfterReturning(pointcut = ALL_PUB_ANNOATION, returning = "retVal")
+	@AfterReturning(pointcut = PointCut.AllPublish, returning = "retVal")
 	@Order(99)
 	public void afterReturning(JoinPoint joinPoint, Object retVal, Publish pub) {
 		if (subscribeRunAfterCommitList.contains(pub.path())) {
@@ -103,41 +95,39 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 			}
 		}
 		// 立即执行
-		psProvider.run(joinPoint, retVal, pub, this, RunPolicy.SameTransation);
+		localProvider.run(joinPoint, retVal, pub, this, RunPolicy.SameTransation);
 	}
 
 	private void checkSubPub() {
-		for (String path : this.pubList) {
+		for (String path : this.publishList) {
 			if (!this.subScribeCallMap.containsKey(path)) {
 				logger.error("没有订阅者,缺少@Subscribe方法,Path:" + path);
 			}
 		}
 		for (String key : subScribeCallMap.keySet()) {
-			if (!this.pubList.contains(key)) {
+			if (!this.publishList.contains(key)) {
 				logger.error("没有发布者,缺少@Publish方法,Path:" + key);
 			}
 		}
 	}
 
-	/**
-	 * 在clusterSync之前的操作
-	 */
-	@Around(ALL_CLUSTERSYNC_ANNOTATION)
+	/** 在ClusterSync之前的操作 */
+	@Around(PointCut.AllClusterSync)
 	@Order(120)
 	public Object doBeforeClusterSync(ProceedingJoinPoint pjp, ClusterSync clusterSync) throws Throwable {
 		return clusterSyncProvider.doBefore(context, pjp, clusterSync);
 	}
 
-	@AfterReturning(pointcut = ALL_REMOTE_NOTIFY_ANNOTATION, returning = "retVal")
+	@AfterReturning(pointcut = PointCut.AllRemoteNotify, returning = "retVal")
 	@Order(100)
 	public void doNotify(JoinPoint joinPoint, Object retVal, RemoteNotify notify) {
 		nwProvider.notify(joinPoint, retVal, notify);
 	}
 
-	@AfterReturning(pointcut = ALL_REMOTE_PUBLISH_ANNOTATION, returning = "retVal")
+	@AfterReturning(pointcut = PointCut.AllRemotePublish, returning = "retVal")
 	@Order(101)
 	public void doRemotePublish(JoinPoint joinPoint, Object retVal, RemotePublish pub) {
-		this.remotePSProvider.publish(joinPoint, retVal, pub);
+		this.remoteProvider.publish(joinPoint, retVal, pub);
 	}
 
 	public ClusterSyncProvider getClusterSyncProvider() {
@@ -169,11 +159,11 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	}
 
 	public PSProvider getPsProvider() {
-		return psProvider;
+		return localProvider;
 	}
 
 	public RemotePSProvider getRemotePSProvider() {
-		return remotePSProvider;
+		return remoteProvider;
 	}
 
 	public Map<String, List<TargetCall>> getRemoteSubscribeMap() {
@@ -186,42 +176,36 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		// 或者考虑一个ArryQueue+Thread+ CallerRunsPolicy,
+		// 或者考虑一个ArryQueue+Thread + CallerRunsPolicy,
 		if (event instanceof ContextRefreshedEvent) {
 			pool = new ThreadPoolExecutor(poolSize, poolSize, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-			if (psProvider == null) {
+			if (localProvider == null) {
 				// 使用默认协调者
-				psProvider = new DefaultPSProviderImpl();
+				localProvider = new DefaultPSProviderImpl();
 			}
 			if (this.clusterSyncProvider == null) {
 				this.clusterSyncProvider = new DoNothingClusterSyncProvider();
 			}
-
 			if (nwProvider == null) {
 				// 使用一个懒惰的provider
 				this.nwProvider = new DoNothingNotifyWaitProvider();
 			}
-
-			if (this.remotePSProvider == null) {
-				this.remotePSProvider = new DoNothingRemotePublishProvider();
+			if (this.remoteProvider == null) {
+				this.remoteProvider = new DoNothingRemotePublishProvider();
 			}
-
 			this.nwProvider.init(this);
-			this.remotePSProvider.init(this);
+			this.remoteProvider.init(this);
 			for (String str : allService) {
 				logger.info("CooperationService:" + str);
 			}
-
-			for (ClusterSync cs : this.clusterSyncList) {
-				clusterSyncProvider.process(context, cs);
-				logger.info("ClusterSync:  ,path=" + cs.path());
+			for (ClusterSync sync : this.clusterSyncList) {
+				clusterSyncProvider.process(context, sync);
+				logger.info("ClusterSync:  ,path=" + sync.path());
 			}
-
 			checkSubPub();
 		} else if (event instanceof ContextStoppedEvent) {
 			nwProvider.close();
-			remotePSProvider.close();
-
+			remoteProvider.close();
 			// 停止，确保 pool执行完毕
 			pool.shutdown();
 			int size = pool.getQueue().size();
@@ -262,106 +246,17 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 				allService.add(clazz.getName());
 			}
 			logger.info("CooperationService of " + clazz.getName());
-			Method[] methods = bean.getClass().getMethods();
-			for (Method m : methods) {
+			HandlrAnnotation handlrAnnotation = new HandlrAnnotation(beanName, this);
+			for (Method m : bean.getClass().getMethods()) {
 				if (m.getAnnotations().length == 0) {
 					continue;
 				}
-
-				if (m.isAnnotationPresent(Subscribe.class)) {
-					Subscribe subcribe = m.getAnnotation(Subscribe.class);
-					String path = subcribe.path();
-					if (PubishAfter.Commit.equals(subcribe.runPolicy()) && !subscribeRunAfterCommitList.contains(path)) {
-						this.subscribeRunAfterCommitList.add(path);
-					}
-
-					List<TargetCall> listCall = subScribeCallMap.get(path);
-					if (listCall == null) {
-						listCall = new ArrayList<TargetCall>();
-						subScribeCallMap.put(path, listCall);
-					}
-					listCall.add(new TargetCall(m, null, beanName, subcribe.runPolicy()));
-				} else {
-					if (m.isAnnotationPresent(Publish.class)) {
-						pubList.add(m.getAnnotation(Publish.class).path());
-					}
-				}
-
-				// 继续检查其他annotation，如 @RemoteSynchronized ,@RemoteNotify等
-				if (m.isAnnotationPresent(ClusterSync.class)) {
-					clusterSyncList.add(m.getAnnotation(ClusterSync.class));
-				}
-
-				if (m.isAnnotationPresent(RemoteNotify.class)) {
-					String path = m.getAnnotation(RemoteNotify.class).path();
-					if (!notifyList.contains(path)) {
-						notifyList.add(path);
-					}
-				}
-				
-				if (m.isAnnotationPresent(RemoteWait.class)) {
-					String path = m.getAnnotation(RemoteWait.class).path();
-
-					List<TargetCall> listCall = waitCallMap.get(path);
-					if (listCall == null) {
-						listCall = new ArrayList<TargetCall>();
-						waitCallMap.put(path, listCall);
-					}
-					// 检查是否重复,否则,这会导致消息被处理俩次
-					if (listCall.size() != 0) {
-						boolean isDuplicate = false;
-						for (TargetCall target : listCall) {
-							if (target.getBeanName().equals(beanName)) {
-								Method other = target.getMethod();
-								if (other.equals(m)) {
-									isDuplicate = true;
-									break;
-								}
-							}
-						}
-						if (!isDuplicate) {
-							listCall.add(new TargetCall(m, null, beanName, null));
-						}
-					} else {
-						listCall.add(new TargetCall(m, null, beanName, null));
-					}
-				}
-
-				if (m.isAnnotationPresent(RemotePublish.class)) {
-					String path = m.getAnnotation(RemotePublish.class).path();
-					if (!remotePubList.contains(path)) {
-						remotePubList.add(path);
-					}
-				}
-
-				if (m.isAnnotationPresent(RemoteSubscribe.class)) {
-					String path = m.getAnnotation(RemoteSubscribe.class).path();
-
-					List<TargetCall> listCall = remoteSubscribeMap.get(path);
-					if (listCall == null) {
-						listCall = new ArrayList<TargetCall>();
-						remoteSubscribeMap.put(path, listCall);
-					}
-					
-					// 检查是否重复,否则,这会导致消息被处理俩次
-					if (listCall.size() != 0) {
-						boolean isDuplicate = false;
-						for (TargetCall call : listCall) {
-							if (call.getBeanName().equals(beanName)) {
-								Method other = call.getMethod();
-								if (other.equals(m)) {
-									isDuplicate = true;
-									break;
-								}
-							}
-						}
-						if (!isDuplicate) {
-							listCall.add(new TargetCall(m, null, beanName, null));
-						}
-					} else {
-						listCall.add(new TargetCall(m, null, beanName, null));
-					}
-				}
+				handlrAnnotation.handlrSubscribe(m);
+				handlrAnnotation.handlrClusterSync(m);
+				handlrAnnotation.handlrRemoteNotify(m);
+				handlrAnnotation.handlrRemoteWait(m);
+				handlrAnnotation.handlrRemotePublish(m);
+				handlrAnnotation.handlrRemoteSubscribe(m);
 			}
 		}
 
@@ -394,11 +289,11 @@ public class SpringBowl implements BeanPostProcessor, ApplicationContextAware, A
 	}
 
 	public void setPsProvider(PSProvider psProvider) {
-		this.psProvider = psProvider;
+		this.localProvider = psProvider;
 	}
 
 	public void setRemotePSProvider(RemotePSProvider remotePSProvider) {
-		this.remotePSProvider = remotePSProvider;
+		this.remoteProvider = remotePSProvider;
 	}
 
 	public void setWaitCallMap(Map<String, List<TargetCall>> waitCallMap) {
